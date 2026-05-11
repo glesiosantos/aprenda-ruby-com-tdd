@@ -1,0 +1,6 @@
+.bundle/
+.rspec_status
+coverage/
+tmp/
+log/
+vendor/bundle/
