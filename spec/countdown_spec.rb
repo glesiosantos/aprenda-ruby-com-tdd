@@ -15,13 +15,24 @@ class SpySleeper
 end
 
 RSpec.describe Countdown do
-  it "escreve a contagem e espera entre os numeros" do
-    output = StringIO.new
-    sleeper = SpySleeper.new
+  subject(:countdown) { described_class.new(output: output, sleeper: sleeper) }
 
-    described_class.new(output: output, sleeper: sleeper).start(from: 3)
+  let(:output) { StringIO.new }
+  let(:sleeper) { SpySleeper.new }
 
-    expect(output.string).to eq("3\n2\n1\nVai!\n")
-    expect(sleeper.calls).to eq(3)
+  describe "#start" do
+    subject(:start) { countdown.start(from: 3) }
+
+    it "writes the countdown" do
+      start
+
+      expect(output.string).to eq("3\n2\n1\nVai!\n")
+    end
+
+    it "sleeps between numbers" do
+      start
+
+      expect(sleeper.calls).to eq(3)
+    end
   end
 end

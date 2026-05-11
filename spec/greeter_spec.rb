@@ -3,16 +3,22 @@ require_relative "../lib/greeter"
 
 RSpec.describe Greeter do
   describe ".hello" do
-    it "cumprimenta o mundo por padrao" do
-      expect(described_class.hello).to eq("Ola, mundo!")
+    context "without arguments" do
+      it "greets the world" do
+        expect(described_class.hello).to eq("Ola, mundo!")
+      end
     end
 
-    it "cumprimenta uma pessoa pelo nome" do
-      expect(described_class.hello("Ruby")).to eq("Ola, Ruby!")
+    context "with a name" do
+      it "greets the person" do
+        expect(described_class.hello("Ruby")).to eq("Ola, Ruby!")
+      end
     end
 
-    it "permite escolher outro idioma" do
-      expect(described_class.hello("Ruby", language: :en)).to eq("Hello, Ruby!")
+    context "with another language" do
+      it "uses that language" do
+        expect(described_class.hello("Ruby", language: :en)).to eq("Hello, Ruby!")
+      end
     end
   end
 end

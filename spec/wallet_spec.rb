@@ -2,31 +2,54 @@ require "spec_helper"
 require_relative "../lib/wallet"
 
 RSpec.describe Wallet do
-  it "guarda saldo inicial" do
-    wallet = described_class.new(10)
+  describe "#balance" do
+    subject(:wallet) { described_class.new(initial_balance) }
 
-    expect(wallet.balance).to eq(10)
+    let(:initial_balance) { 10 }
+
+    it "returns the initial balance" do
+      expect(wallet.balance).to eq(10)
+    end
   end
 
-  it "recebe depositos" do
-    wallet = described_class.new
+  describe "#deposit" do
+    subject(:deposit) { wallet.deposit(amount) }
 
-    wallet.deposit(25)
+    let(:wallet) { described_class.new }
+    let(:amount) { 25 }
 
-    expect(wallet.balance).to eq(25)
+    it "increases the balance" do
+      expect { deposit }.to change(wallet, :balance).from(0).to(25)
+    end
   end
 
-  it "retorna falso quando nao ha saldo para saque" do
-    wallet = described_class.new(10)
+  describe "#withdraw" do
+    subject(:withdraw) { wallet.withdraw(amount) }
 
-    expect(wallet.withdraw(11)).to be(false)
-    expect(wallet.balance).to eq(10)
-  end
+    let(:wallet) { described_class.new(10) }
 
-  it "saca quando ha saldo" do
-    wallet = described_class.new(10)
+    context "when there is enough balance" do
+      let(:amount) { 7 }
 
-    expect(wallet.withdraw(7)).to be(true)
-    expect(wallet.balance).to eq(3)
+      it "returns true" do
+        expect(withdraw).to be(true)
+      end
+
+      it "decreases the balance" do
+        expect { withdraw }.to change(wallet, :balance).from(10).to(3)
+      end
+    end
+
+    context "when balance is not enough" do
+      let(:amount) { 11 }
+
+      it "returns false" do
+        expect(withdraw).to be(false)
+      end
+
+      it "does not change the balance" do
+        expect { withdraw }.not_to change(wallet, :balance)
+      end
+    end
   end
 end
