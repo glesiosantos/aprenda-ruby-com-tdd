@@ -14,9 +14,11 @@ Neste capitulo vamos montar a bateria de testes em tres passos pequenos:
 
 Cada passo segue o mesmo ciclo:
 
-1. Escrever um teste pequeno que falha.
-2. Fazer a implementacao mais simples possivel para passar.
-3. Refatorar somente quando existir teste cobrindo o comportamento.
+1. Escrever um teste pequeno que descreve o comportamento desejado.
+2. Rodar o teste e ler a falha.
+3. Implementar apenas o necessario para passar.
+4. Rodar o teste novamente.
+5. Refatorar somente quando existir teste cobrindo o comportamento.
 
 ## Passo 1: quando ninguem informa um nome
 
@@ -43,7 +45,16 @@ Antes de criar codigo de producao, rode o teste:
 bundle exec rspec spec/greeter_spec.rb
 ```
 
-A primeira falha deve dizer que `Greeter` ainda nao existe. Essa falha e util: ela confirma que o teste esta olhando para o lugar certo.
+A primeira falha deve apontar que `lib/greeter.rb` ainda nao foi encontrado. Essa falha e util: ela confirma que o teste esta olhando para o lugar certo.
+
+Crie entao `lib/greeter.rb` com uma classe vazia:
+
+```ruby
+class Greeter
+end
+```
+
+Rode o teste de novo. Agora a falha deve mudar: o arquivo existe, a classe existe, mas `Greeter` ainda nao responde a `hello`. Essa mudanca na falha mostra que voce avancou um passo.
 
 ## Implementacao minima
 
@@ -57,7 +68,13 @@ class Greeter
 end
 ```
 
-Rode o teste de novo. Ele deve passar. Neste momento o codigo esta simples, mas ainda nao e flexivel. Tudo bem: em TDD, primeiro colocamos um comportamento sob teste, depois deixamos o proprio teste pedir a proxima mudanca.
+Rode novamente:
+
+```bash
+bundle exec rspec spec/greeter_spec.rb
+```
+
+O teste deve passar. Neste momento o codigo esta simples, mas ainda nao e flexivel. Tudo bem: em TDD, primeiro colocamos um comportamento sob teste, depois deixamos o proprio teste pedir a proxima mudanca.
 
 ## Passo 2: quando a pessoa informa o seu nome
 
@@ -71,7 +88,13 @@ context "with a name" do
 end
 ```
 
-Ao rodar os testes, o primeiro ainda passa, mas o novo deve falhar. A falha acontece porque `hello` ainda nao aceita argumento.
+Rode os testes:
+
+```bash
+bundle exec rspec spec/greeter_spec.rb
+```
+
+O primeiro teste deve continuar passando. O novo deve falhar porque `hello` ainda nao aceita argumento. Essa combinacao e importante: o teste antigo protege o comportamento existente, enquanto o teste novo guia a proxima mudanca.
 
 Agora sim mude a implementacao para receber um nome. Use um valor padrao para manter o primeiro teste funcionando:
 
@@ -82,6 +105,8 @@ class Greeter
   end
 end
 ```
+
+Rode de novo. Os dois testes devem ficar verdes.
 
 Aqui aparece a primeira pequena refatoracao. Antes a string era fixa:
 
@@ -111,7 +136,13 @@ end
 
 Esse teste introduz uma keyword argument: `language: :en`. Ela deixa claro que `:en` nao e outro nome, mas uma opcao de idioma.
 
-Rode os testes. O novo teste deve falhar porque o metodo ainda nao conhece `language`.
+Rode os testes:
+
+```bash
+bundle exec rspec spec/greeter_spec.rb
+```
+
+Os dois primeiros testes devem continuar passando. O novo teste deve falhar porque o metodo ainda nao conhece `language`.
 
 ## Implementacao trivial para idioma
 
@@ -132,6 +163,8 @@ Isso resolve os tres testes:
 - Sem argumentos: `name` usa `"mundo"` e `language` usa `:pt`.
 - Com nome: `name` recebe `"Ruby"` e `language` continua `:pt`.
 - Com idioma: `language` recebe `:en` e troca a saudacao para `"Hello"`.
+
+Rode novamente. Os tres testes devem ficar verdes.
 
 Ainda nao precisamos criar uma solucao grande. O teste pediu suporte a um idioma extra, entao um condicional pequeno e suficiente para seguir.
 
@@ -205,10 +238,23 @@ Essa bateria e pequena de proposito. Ela cobre o caminho do aprendizado:
 
 ## Implementacao final do capitulo
 
-Veja `lib/greeter.rb`. O metodo `Greeter.hello` usa argumentos padrao e keyword arguments:
+Veja `lib/greeter.rb`. A implementacao final do capitulo usa argumentos padrao, keyword arguments e uma tabela pequena de mensagens:
 
 ```ruby
-Greeter.hello("Ruby", language: :en)
+class Greeter
+  DEFAULT_LANGUAGE = :pt
+
+  MESSAGES = {
+    pt: "Ola",
+    en: "Hello",
+    es: "Hola"
+  }.freeze
+
+  def self.hello(name = "mundo", language: DEFAULT_LANGUAGE)
+    greeting = MESSAGES.fetch(language) { MESSAGES.fetch(DEFAULT_LANGUAGE) }
+    "#{greeting}, #{name}!"
+  end
+end
 ```
 
 ## Conceitos
